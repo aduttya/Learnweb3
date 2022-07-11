@@ -1,5 +1,5 @@
 const {ethers} = require('hardhat')
-const {expect} = require('chai')
+const {expect, use} = require('chai')
 
 // tHe main goal will be that a third party will pay for the token transfer 
 // write a token smart contract and mint 10000 token to user
@@ -35,21 +35,20 @@ describe("Testing Meta Transactions",() =>{
 
         // minting tokens for user
         const mintTxn = await userTokeninstance.mint(ethers.utils.parseEther('10000'))
-
         let amount = ethers.utils.parseEther('100');
         // approving 100 token to transfer to recipient1
 
-       await userTokeninstance.approve(recipient1.address,ethers.BigNumber.from(
+        const approvetxn =  await userTokeninstance.approve(tokenSender.address,ethers.BigNumber.from(
             "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         ))
 
-        // take a relayer to pay the gas fee to transfer tokens
-        const relayerTokeninstance = await token.connect(relayer)
-        await token.connect(recipient1).transferFrom(user.address,recipient1.address,amount)
+
+        await tokenSender.transfer(user.address,recipient1.address,amount,token.address)
 
         let bal1 = await token.balanceOf(recipient1.address)
-        // check balanaceOf recipent is equal to the transaffered amount
 
+        // check balanaceOf recipent is equal to the transaffered amount
+        console.log("new balance is : ",bal1)
         expect(bal1).to.equal(amount)
     })
 
